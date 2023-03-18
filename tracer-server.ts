@@ -56,7 +56,11 @@ if (settings.enabled) {
   });
   registerInstrumentations({
     instrumentations: [
-      new HttpInstrumentation(),
+      new HttpInstrumentation({
+        ignoreIncomingRequestHook(req) {
+          return req.url == '/healthz' || req.url == '/readyz' || req.url?.startsWith('/sockjs/');
+        },
+      }),
       // getNodeAutoInstrumentations(),
       // new MongoDBInstrumentation(),
     ],
