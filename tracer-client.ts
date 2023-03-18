@@ -37,9 +37,9 @@ if (settings.otlpEndpoint) {
     url: new URL('v1/traces', settings.otlpEndpoint).toString(),
   })));
 
-  // provider.register({
+  provider.register({
     // contextManager: new MeteorContextManager(),
-  // });
+  });
 
   // Registering instrumentations
   // registerInstrumentations({
