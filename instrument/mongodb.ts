@@ -178,22 +178,37 @@ function mongoSpanOptions(ids: ReturnType<typeof collIds>, operation: string) {
 }
 
 function ignored(ids: ReturnType<typeof collIds>) {
+  if (!ids.collectionName) return true;
   if (ids.collectionName.startsWith('__dummy_coll_')) return true;
   if (ids.databaseName == 'local' && ids.collectionName == 'oplog.rs') return true;
   return false;
 }
 
 function collIds(coll: Mongo.Collection<{}>, filter: {}) {
+  if (coll._name == null) {
+    return {
+      databaseName: null,
+      collectionName: null,
+      query: _defaultDbStatementSerializer(filter) ?? {},
+    };
+  }
   return {
-    databaseName: coll.rawDatabase().databaseName,
-    collectionName: coll.rawCollection().collectionName,
+    databaseName: coll.rawDatabase().databaseName as string,
+    collectionName: coll.rawCollection().collectionName as string,
     query: _defaultDbStatementSerializer(filter) ?? {},
   };
 }
 function cursorIds(cursor: Mongo.Cursor<{}>) {
+  if (!cursor._cursorDescription.collectionName) {
+    return {
+      databaseName: null,
+      collectionName: null,
+      query: _defaultDbStatementSerializer(cursor._cursorDescription.selector),
+    };
+  }
   return {
-    databaseName: cursor._mongo.db.databaseName,
-    collectionName: cursor._cursorDescription.collectionName,
+    databaseName: cursor._mongo.db.databaseName as string,
+    collectionName: cursor._cursorDescription.collectionName as string,
     query: _defaultDbStatementSerializer(cursor._cursorDescription.selector),
   };
 }
