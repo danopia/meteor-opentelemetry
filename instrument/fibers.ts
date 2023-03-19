@@ -76,9 +76,8 @@ export function wrapFibers () {
 
     // TODO: consider copying our env from 'Fibers.current' into 'this'
 
-    let result;
     try {
-      result = originalRun.call(this, val);
+      return originalRun.call(this, val);
     } finally {
       // console.log('fiber end')
       if (!this.started) {
@@ -87,26 +86,21 @@ export function wrapFibers () {
         this[StartTracked] = false;
       }
     }
-
-    return result;
   };
 
   Fibers.prototype.throwInto = function (val) {
     ensureFiberCounted(this);
     // endAsyncEvent(this);
 
-    let result;
     console.log("fiber throwinto", val.message)
 
     try {
-      result = originalThrowInto.call(this, val);
+      return originalThrowInto.call(this, val);
     } finally {
       if (!this.started) {
         activeFibers.add(-1);
         this[StartTracked] = false;
       }
     }
-
-    return result;
   };
 }
