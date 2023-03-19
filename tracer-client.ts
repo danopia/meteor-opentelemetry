@@ -8,6 +8,7 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { context, propagation, SpanKind, trace } from "@opentelemetry/api";
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 // import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
+import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
 
 import './instrument/ddp-client'
 
@@ -21,7 +22,7 @@ if (settings.otlpEndpoint) {
     resource: new Resource({
       'session.host': document.location.host,
       'session.id': crypto.randomUUID(),
-      'browser.languages': navigator.languages,
+      'browser.languages': [...navigator.languages],
       // vvv https://opentelemetry.io/docs/reference/specification/resource/semantic_conventions/browser/
       'browser.brands': navigator.userAgentData?.brands?.map(x => `${x.brand} ${x.version}`) ?? [],
       'browser.platform':navigator.userAgentData?.platform,
@@ -42,10 +43,11 @@ if (settings.otlpEndpoint) {
   });
 
   // Registering instrumentations
-  // registerInstrumentations({
-  //   instrumentations: [
-  //     // new DocumentLoadInstrumentation(),
-  //   ],
-  // });
+  registerInstrumentations({
+    instrumentations: [
+      // new DocumentLoadInstrumentation(),
+      new UserInteractionInstrumentation(),
+    ],
+  });
 
 }

@@ -14,6 +14,7 @@ Npm.depends({
   '@opentelemetry/exporter-trace-otlp-http': '0.36.0',
   '@opentelemetry/exporter-metrics-otlp-http': '0.36.0',
   '@opentelemetry/instrumentation-http': '0.36.0',
+  '@opentelemetry/instrumentation-user-interaction': '0.32.1',
 });
 
 Package.onUse(function(api) {
