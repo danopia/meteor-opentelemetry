@@ -16,7 +16,7 @@ import { MeteorContextManager } from "./server/context-manager";
 
 
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import { PeriodicExportingMetricReader, AggregationTemporality } from '@opentelemetry/sdk-metrics';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 
 
@@ -40,7 +40,9 @@ if (settings.enabled) {
   });
   metrics.setGlobalMeterProvider(metricsProvider);
   metricsProvider.addMetricReader(new PeriodicExportingMetricReader({
-    exporter: new OTLPMetricExporter(),
+    exporter: new OTLPMetricExporter({
+      temporalityPreference: AggregationTemporality.DELTA,
+    }),
     exportIntervalMillis: 5000,
   }));
 
