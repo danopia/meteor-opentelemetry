@@ -12,9 +12,10 @@ MeteorX.onReady(() => {
   // cursors have _cursorDescription: {collectionName, selector, options}
   const origFind = x1.fetch;
   x1.fetch = function (this: Mongo.Cursor<unknown>, ...args) {
-    // console.error(this, args)
-    return tracer.startActiveSpan('find.fetch '+this._cursorDescription.collectionName,
-      cursorSpanOptions(this, 'find.fetch'),
+    const ids = cursorIds(this);
+    if (ignored(ids)) return origFind.apply(this, args);
+    return tracer.startActiveSpan(`find.fetch ${ids.collectionName}`,
+      mongoSpanOptions(ids, 'find.fetch'),
       span => {
         try {
           const resp = origFind.apply(this, args);
@@ -27,8 +28,10 @@ MeteorX.onReady(() => {
   }
   const origCount = x1.count;
   x1.count = function (this: Mongo.Cursor<unknown>, ...args) {
-    return tracer.startActiveSpan('find.count '+this._cursorDescription.collectionName,
-      cursorSpanOptions(this, 'find.count'),
+    const ids = cursorIds(this);
+    if (ignored(ids)) return origCount.apply(this, args);
+    return tracer.startActiveSpan(`find.count ${ids.collectionName}`,
+      mongoSpanOptions(ids, 'find.count'),
       span => {
         try {
           const result = origCount.apply(this, args)
@@ -41,8 +44,10 @@ MeteorX.onReady(() => {
   }
   const origForEach = x1.forEach;
   x1.forEach = function (this: Mongo.Cursor<unknown>, ...args) {
-    return tracer.startActiveSpan('find.forEach '+this._cursorDescription.collectionName,
-      cursorSpanOptions(this, 'find.forEach'),
+    const ids = cursorIds(this);
+    if (ignored(ids)) return origForEach.apply(this, args);
+    return tracer.startActiveSpan(`find.forEach ${ids.collectionName}`,
+      mongoSpanOptions(ids, 'find.forEach'),
       span => {
         try {
           return origForEach.apply(this, args)
@@ -53,8 +58,10 @@ MeteorX.onReady(() => {
   }
   const origMap = x1.map;
   x1.map = function (this: Mongo.Cursor<unknown>, ...args) {
-    return tracer.startActiveSpan('find.map '+this._cursorDescription.collectionName,
-      cursorSpanOptions(this, 'find.map'),
+    const ids = cursorIds(this);
+    if (ignored(ids)) return origMap.apply(this, args);
+    return tracer.startActiveSpan(`find.map ${ids.collectionName}`,
+      mongoSpanOptions(ids, 'find.map'),
       span => {
         try {
           return origMap.apply(this, args)
@@ -68,12 +75,10 @@ MeteorX.onReady(() => {
 const x2 = Mongo.Collection.prototype as InstanceType< typeof Mongo.Collection>;
 const origFindOne = x2.findOne;
 x2.findOne = function (this: Mongo.Collection<unknown>, ...args) {
-  // drop MeteorX lookups
-  if (this.rawCollection().collectionName.startsWith('__dummy_coll_')) {
-    return origFindOne.apply(this, args);
-  }
-  return tracer.startActiveSpan('findOne '+this.rawCollection().collectionName,
-    spanOptions(this, 'findOne', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origFindOne.apply(this, args);
+  return tracer.startActiveSpan(`findOne ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'findOne'),
     span => {
       try {
         return origFindOne.apply(this, args)
@@ -84,8 +89,10 @@ x2.findOne = function (this: Mongo.Collection<unknown>, ...args) {
 }
 const origCreateIndex = x2.createIndex;
 x2.createIndex = function (this: Mongo.Collection<unknown>, ...args) {
-  return tracer.startActiveSpan('createIndex '+this.rawCollection().collectionName,
-    spanOptions(this, 'createIndex', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origCreateIndex.apply(this, args);
+  return tracer.startActiveSpan(`createIndex ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'createIndex'),
     span => {
       try {
         return origCreateIndex.apply(this, args)
@@ -96,8 +103,10 @@ x2.createIndex = function (this: Mongo.Collection<unknown>, ...args) {
 }
 const origInsert = x2.insert;
 x2.insert = function (this: Mongo.Collection<unknown>, ...args) {
-  return tracer.startActiveSpan('insert '+this.rawCollection().collectionName,
-    spanOptions(this, 'insert', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origInsert.apply(this, args);
+  return tracer.startActiveSpan(`insert ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'insert'),
     span => {
       try {
         return origInsert.apply(this, args)
@@ -108,8 +117,10 @@ x2.insert = function (this: Mongo.Collection<unknown>, ...args) {
 }
 const origRemove = x2.remove;
 x2.remove = function (this: Mongo.Collection<unknown>, ...args) {
-  return tracer.startActiveSpan('remove '+this.rawCollection().collectionName,
-    spanOptions(this, 'remove', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origRemove.apply(this, args);
+  return tracer.startActiveSpan(`remove ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'remove'),
     span => {
       try {
         const result = origRemove.apply(this, args)
@@ -122,8 +133,10 @@ x2.remove = function (this: Mongo.Collection<unknown>, ...args) {
 }
 const origUpdate = x2.update;
 x2.update = function (this: Mongo.Collection<unknown>, ...args) {
-  return tracer.startActiveSpan('update '+this.rawCollection().collectionName,
-    spanOptions(this, 'update', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origUpdate.apply(this, args);
+  return tracer.startActiveSpan(`update ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'update'),
     span => {
       try {
         const result = origUpdate.apply(this, args)
@@ -136,8 +149,10 @@ x2.update = function (this: Mongo.Collection<unknown>, ...args) {
 }
 const origUpsert = x2.upsert;
 x2.upsert = function (this: Mongo.Collection<unknown>, ...args) {
-  return tracer.startActiveSpan('upsert '+this.rawCollection().collectionName,
-    spanOptions(this, 'upsert', args[0]),
+  const ids = collIds(this, args[0]);
+  if (ignored(ids)) return origUpsert.apply(this, args);
+  return tracer.startActiveSpan(`upsert ${ids.collectionName}`,
+    mongoSpanOptions(ids, 'upsert'),
     span => {
       try {
         return origUpsert.apply(this, args)
@@ -148,31 +163,38 @@ x2.upsert = function (this: Mongo.Collection<unknown>, ...args) {
 }
 
 
-function spanOptions(coll: Mongo.Collection<{}>, operation: string, filter: unknown) {
-  return {
-    kind: SpanKind.CLIENT,
-    attributes: {
-      [SemanticAttributes.DB_SYSTEM]: DbSystemValues.MONGODB,
-      [SemanticAttributes.DB_NAME]: coll.rawDatabase().databaseName,
-      [SemanticAttributes.DB_MONGODB_COLLECTION]: coll.rawCollection().collectionName,
-      [SemanticAttributes.DB_OPERATION]: operation,
-      [SemanticAttributes.DB_STATEMENT]: filter ? _defaultDbStatementSerializer(filter) : null,
-    }
-  };
-}
-
-
-function cursorSpanOptions(cursor: Mongo.Cursor<{}>, operation: string) {
+function mongoSpanOptions(ids: ReturnType<typeof collIds>, operation: string) {
   // console.error({db: cursor._mongo.db.databaseName});
   return {
     kind: SpanKind.CLIENT,
     attributes: {
       [SemanticAttributes.DB_SYSTEM]: DbSystemValues.MONGODB,
-      [SemanticAttributes.DB_NAME]: cursor._mongo.db.databaseName,
-      [SemanticAttributes.DB_MONGODB_COLLECTION]: cursor._cursorDescription.collectionName,
+      [SemanticAttributes.DB_NAME]: ids.databaseName,
+      [SemanticAttributes.DB_MONGODB_COLLECTION]: ids.collectionName,
       [SemanticAttributes.DB_OPERATION]: operation,
-      [SemanticAttributes.DB_STATEMENT]: _defaultDbStatementSerializer(cursor._cursorDescription.selector),
+      [SemanticAttributes.DB_STATEMENT]: JSON.stringify(ids.query),
     }
+  };
+}
+
+function ignored(ids: ReturnType<typeof collIds>) {
+  if (ids.collectionName.startsWith('__dummy_coll_')) return true;
+  if (ids.databaseName == 'local' && ids.collectionName == 'oplog.rs') return true;
+  return false;
+}
+
+function collIds(coll: Mongo.Collection<{}>, filter: {}) {
+  return {
+    databaseName: coll.rawDatabase().databaseName,
+    collectionName: coll.rawCollection().collectionName,
+    query: _defaultDbStatementSerializer(filter) ?? {},
+  };
+}
+function cursorIds(cursor: Mongo.Cursor<{}>) {
+  return {
+    databaseName: cursor._mongo.db.databaseName,
+    collectionName: cursor._cursorDescription.collectionName,
+    query: _defaultDbStatementSerializer(cursor._cursorDescription.selector),
   };
 }
 
@@ -232,14 +254,18 @@ function cursorSpanOptions(cursor: Mongo.Cursor<{}>, operation: string) {
 
 
 function _defaultDbStatementSerializer(commandObj: string | Record<string, unknown>) {
-  const enhancedDbReporting = false;//!!this._config?.enhancedDatabaseReporting;
+  const enhancedDbReporting = true;//!!this._config?.enhancedDatabaseReporting;
   const resultObj = typeof commandObj == 'string'
     ? { _id: commandObj }
     : enhancedDbReporting
       ? commandObj
-      : Object.keys(commandObj).reduce((obj, key) => {
-          obj[key] = '?';
+      : Object.entries(commandObj).reduce((obj, [key,val]) => {
+          obj[key] = key.startsWith('$')
+            ? (Array.isArray(val)
+              ? val.map(_defaultDbStatementSerializer)
+              : _defaultDbStatementSerializer(val))
+            : '?'; // TODO: if val is object and all keys start with '$' then convert that too
           return obj;
         }, {} as { [key: string]: unknown });
-  return JSON.stringify(resultObj);
+  return resultObj;
 }
