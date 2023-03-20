@@ -92,7 +92,7 @@ export function wrapFibers () {
     ensureFiberCounted(this);
     // endAsyncEvent(this);
 
-    console.log("fiber throwinto", val.message)
+    // console.log("fiber throwinto", val.message)
 
     try {
       return originalThrowInto.call(this, val);

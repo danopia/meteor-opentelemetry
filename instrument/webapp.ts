@@ -5,7 +5,7 @@ import type { IncomingMessage } from 'http';
 // For WebApp, we simply pass the outside span thru into Meteor's interior context
 // This depends on the standard http instrumentation to create the actual request spans
 
-const reqMap = new WeakMap<IncomingMessage,Span>();
+const reqMap = new WeakMap<IncomingMessage, Span | undefined>();
 
 WebApp.rawConnectHandlers.use((req, resp, next) => {
   // console.log('raw', req.url, trace.getActiveSpan())
