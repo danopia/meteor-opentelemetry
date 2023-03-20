@@ -5,7 +5,6 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO)
 import { BatchSpanProcessor, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { Resource } from '@opentelemetry/resources';
-// import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 // import { MongoDBInstrumentation } from "@opentelemetry/instrumentation-mongodb"
