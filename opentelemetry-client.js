@@ -4,4 +4,10 @@
 // applications. See opentelemetry-tests.js for an example of importing.
 export const name = 'opentelemetry';
 
-import './tracer-client'
+import './tracer-client';
+
+export {
+  traceAsyncFunc,
+  tracedInterval,
+  tracedTimeout,
+} from './api';

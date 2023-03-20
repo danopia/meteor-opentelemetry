@@ -5,3 +5,9 @@
 export const name = 'opentelemetry';
 
 import './tracer-server'
+
+export {
+  traceAsyncFunc,
+  tracedInterval,
+  tracedTimeout,
+} from './api';
