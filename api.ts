@@ -24,9 +24,11 @@ export async function traceAsyncFunc<T>(spanName: string, func: (span: Span) => 
 }
 
 export async function tracedInterval<T>(func: (span: Span) => Promise<T>, delayMs: number) {
-  return Meteor.setInterval(() => traceAsyncFunc(func.name || '(anonymous)', func), delayMs);
+  const funcName = func.name || `${func.toString().slice(0, 50)}...` || '(anonymous)';
+  return Meteor.setInterval(() => traceAsyncFunc(funcName, func), delayMs);
 }
 
 export async function tracedTimeout<T>(func: (span: Span) => Promise<T>, delayMs: number) {
-  return Meteor.setTimeout(() => traceAsyncFunc(func.name || '(anonymous)', func), delayMs);
+  const funcName = func.name || `${func.toString().slice(0, 50)}...` || '(anonymous)';
+  return Meteor.setTimeout(() => traceAsyncFunc(funcName, func), delayMs);
 }
