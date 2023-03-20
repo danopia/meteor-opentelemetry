@@ -2,55 +2,41 @@ import { Context, ContextManager, ROOT_CONTEXT } from '@opentelemetry/api';
 import { Meteor } from 'meteor/meteor';
 
 import Fiber from 'fibers';
+import { AbstractAsyncHooksContextManager } from './AbstractAsyncHooksContextManager';
 
-export class MeteorContextManager implements ContextManager {
+export class MeteorContextManager extends AbstractAsyncHooksContextManager implements ContextManager {
   envVar: Meteor.EnvironmentVariable<Context>;
   constructor() {
+    super();
     this.envVar = new Meteor.EnvironmentVariable<Context>();
   }
 
-  rootWith?: <A extends unknown[], F extends (...args: A) => ReturnType<F>>(context: Context, fn: F, thisArg?: ThisParameterType<F> | undefined, ...args: A) => ReturnType<F>;
-  rootBind?: <T>(context: Context, target: T) => T;
-
   active(): Context {
-    if (!Fiber.current) return ROOT_CONTEXT;
     return this.envVar.getOrNullIfOutsideFiber() ?? ROOT_CONTEXT;
   }
-  with<A extends unknown[], F extends (...args: A) => ReturnType<F>>(context: Context, fn: F, thisArg?: ThisParameterType<F> | undefined, ...args: A): ReturnType<F> {
+  with<A extends unknown[], F extends (...args: A) => ReturnType<F>>(
+    context: Context,
+    fn: F,
+    thisArg?: ThisParameterType<F>,
+    ...args: A
+  ): ReturnType<F> {
+    const cb = thisArg == null ? fn : fn.bind(thisArg);
     if (!Fiber.current) {
-      return this.rootWith!(context, fn, thisArg);
-      // return Meteor.bindEnvironment(() => this.with(context, fn, thisArg, ...args))();
-      // return fn.apply(thisArg, args);
+      // We just tolerate running without fiber.
+      // This happens on async operations within general-audience NodeJS libraries.
+      // Maybe a metric could be added so we could drive this to zero, but a general fix isn't clear.
+      // The downside is that spans happening outside a fiber simply aren't observable.
+      return cb(...args);
     }
-    return this.envVar.withValue(context, (thisArg || args.length) ? fn.bind(thisArg, ...args) : fn);
-  }
-  bind<T>(context: Context, target: T): T {
-    if (!Fiber.current) {
-      return this.rootBind!(context, target);
-      // return Meteor.bindEnvironment(() => this.with(context, fn, thisArg, ...args))();
-      // return fn.apply(thisArg, args);
-    }
-    // if (target instanceof EventEmitter) {
-    //   // throw new Error(`TODO: bind of EventEmitter`);
-    //   return this._bindEventEmitter(context, target);
-    // }
-    if (typeof target === 'function') {
-      // Seems like the easiest way to grab a specific new context for later calling
-      return this.envVar.withValue(context, () => Meteor.bindEnvironment(target));
-    }
-    return target;
+    return this.envVar.withValue(context, () => cb(...args));
   }
 
   // Meteor's context manager is always active - we don't control the lifecycle
   enable(): this {
-    this.rootBind = Meteor.bindEnvironment(this.bind.bind(this));
-    this.rootWith = Meteor.bindEnvironment(this.with.bind(this));
     return this;
-    // throw new Error('Method not implemented.');
   }
   disable(): this {
     return this;
-    // throw new Error('Method not implemented.');
   }
 
 }
