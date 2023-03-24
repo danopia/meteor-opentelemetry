@@ -4,6 +4,7 @@
 // applications. See opentelemetry-tests.js for an example of importing.
 export const name = 'opentelemetry';
 
+import './ddp-otlp-server'
 import './tracer-server'
 
 export {

@@ -36,31 +36,81 @@ registerInstrumentations({
 });
 ```
 
+## Browser Setup
+
+Optionally, you can import this package from your client entrypoint to gather in-browser telemetry
+including client-to-server DDP tracing.
+
+This package will submit OpenTelemetry payloads over Meteor's existing DDP connection,
+using your application server as a proxy,
+instead of having every browser talking directly to your `otelcol` endpoint and thus needing CORS configuration.
+
+Example snippit for your `client.ts` file:
+
+```ts
+// Set up an OpenTelemetry provider using DDP submission and tracing
+// (required to have client-to-server DDP tracing)
+import 'meteor/danopia:opentelemetry';
+
+// Register additional browser-side instrumentations
+// (optional)
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
+registerInstrumentations({
+  instrumentations: [
+    new UserInteractionInstrumentation(),
+  ],
+});
+```
+
 ## Example `settings.json`
 
-Note that only the server's OTel can be configured by environment variables.
-The client configuration can only be applied via `settings.json`.
+OTLP environment variables are tolerated;
+for example, these variables will enable tracing:
+
+```sh
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4218
+OTEL_SERVICE_NAME=
+```
+
+You can also enable this library and supply configuration via Meteor settings:
 
 ```json
 {
   "packages": {
     "danopia:opentelemetry": {
       "enabled": true,
-      "resourceAttributes": {
+      "serverResourceAttributes": {
         "service.name": "my-app",
+        "deployment.environment": "local"
+      },
+      "clientResourceAttributes": {
+        "service.name": "my-app-browser",
         "deployment.environment": "local"
       }
     }
-  },
-  "public": {
-    "packages": {
-      "danopia:opentelemetry": {
-        "enabled": true,
-        "resourceAttributes": {
-          "service.name": "my-app-web",
-          "deployment.environment": "local"
-        },
-        "otlpEndpoint": "https://some-public-otel-collector"
+  }
+}
+```
+
+Note that OpenTelemetry defines a number of environment variables such as
+`OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_RESOURCE_ATTRIBUTES`.
+Since `meteor-opentelemetry` submits traces thru DDP,
+OpenTelemetry wants to treat client and server data similarly.
+So it might be desirable to set resource attributes via Meteor settings:
+
+```json
+{
+  "packages": {
+    "danopia:opentelemetry": {
+      "enabled": true,
+      "serverResourceAttributes": {
+        "service.name": "my-app",
+        "deployment.environment": "local"
+      },
+      "clientResourceAttributes": {
+        "service.name": "my-app-browser",
+        "deployment.environment": "local"
       }
     }
   }
