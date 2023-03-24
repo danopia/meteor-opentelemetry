@@ -1,8 +1,5 @@
 import { Meteor } from "meteor/meteor";
 
-import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-
 import { SpanExporter, ReadableSpan } from '@opentelemetry/sdk-trace-web';
 import { ExportResultCode, type ExportResult } from "@opentelemetry/core";
 import { createExportTraceServiceRequest } from '@opentelemetry/otlp-transformer';
