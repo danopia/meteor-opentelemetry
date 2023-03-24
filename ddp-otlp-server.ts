@@ -9,7 +9,9 @@ import { sendWithHttp } from '@opentelemetry/otlp-exporter-base';
 import { settings } from "./settings";
 
 if (settings.enabled) {
-  const clientExporter = new OTLPTraceExporter();
+  const clientExporter = new OTLPTraceExporter({
+    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/metrics` : null,
+  });
 
   const clientResources = new Resource(settings.clientResourceAttributes ?? {});
   clientResources.attributes['service.name'] ??= `unknown_service-browser`;
