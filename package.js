@@ -1,6 +1,6 @@
 Package.describe({
   name: 'danopia:opentelemetry',
-  version: '0.3.0',
+  version: '0.3.1',
   summary: 'Meteor instrumentations for OpenTelemetry tracing',
   git: 'https://github.com/danopia/meteor-opentelemetry',
   documentation: 'README.md',
