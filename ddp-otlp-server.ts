@@ -9,8 +9,8 @@ import { sendWithHttp } from '@opentelemetry/otlp-exporter-base';
 import { settings } from "./settings";
 
 if (settings.enabled) {
-  const clientExporter = new OTLPTraceExporter({
-    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/metrics` : null,
+  const tracesExporter = new OTLPTraceExporter({
+    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/traces` : null,
   });
 
   const clientResources = new Resource(settings.clientResourceAttributes ?? {});
@@ -34,7 +34,7 @@ if (settings.enabled) {
         ];
       }
       await new Promise<void>((ok, fail) =>
-        sendWithHttp(clientExporter, JSON.stringify(tracePayload), 'application/json', ok, fail));
+        sendWithHttp(tracesExporter, JSON.stringify(tracePayload), 'application/json', ok, fail));
     },
   });
 
