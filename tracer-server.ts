@@ -24,14 +24,18 @@ if (settings.enabled) {
     resource,
   });
   metricsProvider.addMetricReader(new PeriodicExportingMetricReader({
-    exporter: new OTLPMetricExporter(),
+    exporter: new OTLPMetricExporter({
+      url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/metrics` : null,
+    }),
     exportIntervalMillis: 20_000,
   }));
 
   const provider = new NodeTracerProvider({
     resource,
   });
-  provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter()));
+  provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter({
+    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/traces` : null,
+  })));
   provider.register({
     contextManager: new MeteorContextManager().enable(),
   });
