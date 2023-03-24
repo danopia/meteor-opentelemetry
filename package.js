@@ -12,6 +12,7 @@ Npm.depends({
   '@opentelemetry/sdk-trace-web': '1.10.0',
   '@opentelemetry/semantic-conventions': '1.10.0',
   '@opentelemetry/exporter-trace-otlp-http': '0.36.0',
+  '@opentelemetry/otlp-transformer': '0.36.0',
   '@opentelemetry/exporter-metrics-otlp-http': '0.36.0',
   '@opentelemetry/instrumentation-user-interaction': '0.32.1',
 });
