@@ -1,10 +1,9 @@
-import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
+import { diag, DiagConsoleLogger, DiagLogLevel, metrics } from "@opentelemetry/api";
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 import { Resource } from '@opentelemetry/resources';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BatchSpanProcessor, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { PeriodicExportingMetricReader, AggregationTemporality, MeterProvider } from '@opentelemetry/sdk-metrics';
+import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
@@ -25,7 +24,7 @@ if (settings.enabled) {
   });
   metricsProvider.addMetricReader(new PeriodicExportingMetricReader({
     exporter: new OTLPMetricExporter({
-      url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/metrics` : null,
+      url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/metrics` : undefined,
     }),
     exportIntervalMillis: 20_000,
   }));
@@ -34,16 +33,19 @@ if (settings.enabled) {
     resource,
   });
   provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter({
-    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/traces` : null,
+    url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/traces` : undefined,
   })));
   provider.register({
     contextManager: new MeteorContextManager().enable(),
   });
 
-  registerInstrumentations({
-    tracerProvider: provider,
-    meterProvider: metricsProvider,
-  })
+  // This is probably something to be called by the implementer, not the library
+  // registerInstrumentations({
+  //   tracerProvider: provider,
+  //   meterProvider: metricsProvider,
+  // })
+
+  metrics.setGlobalMeterProvider(metricsProvider);
 
   wrapFibers(); // apparently needs to happen after the metrics provider is set up
 }
