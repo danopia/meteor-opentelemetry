@@ -2,6 +2,7 @@ import { diag, DiagConsoleLogger, DiagLogLevel, metrics } from "@opentelemetry/a
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 import { Resource } from '@opentelemetry/resources';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BatchSpanProcessor, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
 
@@ -39,11 +40,11 @@ if (settings.enabled) {
     contextManager: new MeteorContextManager().enable(),
   });
 
-  // This is probably something to be called by the implementer, not the library
-  // registerInstrumentations({
-  //   tracerProvider: provider,
-  //   meterProvider: metricsProvider,
-  // })
+  // TODO: This is probably something to be called by the implementer, not the library
+  registerInstrumentations({
+    tracerProvider: provider,
+    meterProvider: metricsProvider,
+  })
 
   metrics.setGlobalMeterProvider(metricsProvider);
 
