@@ -29,6 +29,7 @@ if (settings.enabled) {
     }),
     exportIntervalMillis: 20_000,
   }));
+  metrics.setGlobalMeterProvider(metricsProvider);
 
   const provider = new NodeTracerProvider({
     resource,
@@ -36,17 +37,10 @@ if (settings.enabled) {
   provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter({
     url: settings.otlpEndpoint ? `${settings.otlpEndpoint}/v1/traces` : undefined,
   })));
+  // this also sets the global trace provider:
   provider.register({
     contextManager: new MeteorContextManager().enable(),
   });
-
-  // TODO: This is probably something to be called by the implementer, not the library
-  registerInstrumentations({
-    tracerProvider: provider,
-    meterProvider: metricsProvider,
-  })
-
-  metrics.setGlobalMeterProvider(metricsProvider);
 
   wrapFibers(); // apparently needs to happen after the metrics provider is set up
 }
