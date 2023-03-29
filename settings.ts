@@ -6,6 +6,7 @@ export const settings: {
   otlpEndpoint?: string;
   serverResourceAttributes?: Attributes;
   clientResourceAttributes?: Attributes;
+  enhancedDbReporting?: boolean;
 } = {
   ...Meteor.settings.packages?.["danopia:opentelemetry"] ?? {},
 };

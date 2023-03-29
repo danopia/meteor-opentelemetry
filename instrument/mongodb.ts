@@ -1,9 +1,11 @@
-import { trace, SpanKind } from "@opentelemetry/api";
+import { trace, SpanKind, context } from "@opentelemetry/api";
+import { suppressTracing } from "@opentelemetry/core";
 import { Mongo } from "meteor/mongo";
 import {
   DbSystemValues,
   SemanticAttributes,
 } from '@opentelemetry/semantic-conventions';
+import { settings } from "../settings";
 
 const tracer = trace.getTracer('meteor.mongo');
 
@@ -11,7 +13,7 @@ MeteorX.onReady(() => {
   const x1 = MeteorX.MongoCursor.prototype as InstanceType< typeof Mongo.Cursor>;
   // cursors have _cursorDescription: {collectionName, selector, options}
   const origFind = x1.fetch;
-  x1.fetch = function (this: Mongo.Cursor<unknown>, ...args) {
+  x1.fetch = function (this: Mongo.Cursor<{}>, ...args) {
     const ids = cursorIds(this);
     if (ignored(ids)) return origFind.apply(this, args);
     return tracer.startActiveSpan(`find.fetch ${ids.collectionName}`,
@@ -27,7 +29,7 @@ MeteorX.onReady(() => {
     });
   }
   const origCount = x1.count;
-  x1.count = function (this: Mongo.Cursor<unknown>, ...args) {
+  x1.count = function (this: Mongo.Cursor<{}>, ...args) {
     const ids = cursorIds(this);
     if (ignored(ids)) return origCount.apply(this, args);
     return tracer.startActiveSpan(`find.count ${ids.collectionName}`,
@@ -43,7 +45,7 @@ MeteorX.onReady(() => {
       });
   }
   const origForEach = x1.forEach;
-  x1.forEach = function (this: Mongo.Cursor<unknown>, ...args) {
+  x1.forEach = function (this: Mongo.Cursor<{}>, ...args) {
     const ids = cursorIds(this);
     if (ignored(ids)) return origForEach.apply(this, args);
     return tracer.startActiveSpan(`find.forEach ${ids.collectionName}`,
@@ -57,7 +59,7 @@ MeteorX.onReady(() => {
       });
   }
   const origMap = x1.map;
-  x1.map = function (this: Mongo.Cursor<unknown>, ...args) {
+  x1.map = function (this: Mongo.Cursor<{}>, ...args) {
     const ids = cursorIds(this);
     if (ignored(ids)) return origMap.apply(this, args);
     return tracer.startActiveSpan(`find.map ${ids.collectionName}`,
@@ -74,21 +76,22 @@ MeteorX.onReady(() => {
 
 const x2 = Mongo.Collection.prototype as InstanceType< typeof Mongo.Collection>;
 const origFindOne = x2.findOne;
-x2.findOne = function (this: Mongo.Collection<unknown>, ...args) {
+x2.findOne = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origFindOne.apply(this, args);
   return tracer.startActiveSpan(`findOne ${ids.collectionName}`,
     mongoSpanOptions(ids, 'findOne'),
     span => {
       try {
-        return origFindOne.apply(this, args)
+        const ctx = suppressTracing(context.active());
+        return context.with(ctx, () => origFindOne.apply(this, args));
       } finally {
         span.end();
       }
     });
 }
 const origCreateIndex = x2.createIndex;
-x2.createIndex = function (this: Mongo.Collection<unknown>, ...args) {
+x2.createIndex = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origCreateIndex.apply(this, args);
   return tracer.startActiveSpan(`createIndex ${ids.collectionName}`,
@@ -102,7 +105,7 @@ x2.createIndex = function (this: Mongo.Collection<unknown>, ...args) {
     });
 }
 const origInsert = x2.insert;
-x2.insert = function (this: Mongo.Collection<unknown>, ...args) {
+x2.insert = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origInsert.apply(this, args);
   return tracer.startActiveSpan(`insert ${ids.collectionName}`,
@@ -116,7 +119,7 @@ x2.insert = function (this: Mongo.Collection<unknown>, ...args) {
     });
 }
 const origRemove = x2.remove;
-x2.remove = function (this: Mongo.Collection<unknown>, ...args) {
+x2.remove = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origRemove.apply(this, args);
   return tracer.startActiveSpan(`remove ${ids.collectionName}`,
@@ -132,7 +135,7 @@ x2.remove = function (this: Mongo.Collection<unknown>, ...args) {
     });
 }
 const origUpdate = x2.update;
-x2.update = function (this: Mongo.Collection<unknown>, ...args) {
+x2.update = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origUpdate.apply(this, args);
   return tracer.startActiveSpan(`update ${ids.collectionName}`,
@@ -148,14 +151,15 @@ x2.update = function (this: Mongo.Collection<unknown>, ...args) {
   });
 }
 const origUpsert = x2.upsert;
-x2.upsert = function (this: Mongo.Collection<unknown>, ...args) {
+x2.upsert = function (this: Mongo.Collection<{}>, ...args) {
   const ids = collIds(this, args[0]);
   if (ignored(ids)) return origUpsert.apply(this, args);
   return tracer.startActiveSpan(`upsert ${ids.collectionName}`,
     mongoSpanOptions(ids, 'upsert'),
     span => {
       try {
-        return origUpsert.apply(this, args)
+        const ctx = suppressTracing(context.active());
+        return context.with(ctx, () => origUpsert.apply(this, args));
       } finally {
         span.end();
       }
@@ -169,8 +173,8 @@ function mongoSpanOptions(ids: ReturnType<typeof collIds>, operation: string) {
     kind: SpanKind.CLIENT,
     attributes: {
       [SemanticAttributes.DB_SYSTEM]: DbSystemValues.MONGODB,
-      [SemanticAttributes.DB_NAME]: ids.databaseName,
-      [SemanticAttributes.DB_MONGODB_COLLECTION]: ids.collectionName,
+      [SemanticAttributes.DB_NAME]: ids.databaseName ?? undefined,
+      [SemanticAttributes.DB_MONGODB_COLLECTION]: ids.collectionName ?? undefined,
       [SemanticAttributes.DB_OPERATION]: operation,
       [SemanticAttributes.DB_STATEMENT]: JSON.stringify(ids.query),
     }
@@ -269,7 +273,7 @@ function cursorIds(cursor: Mongo.Cursor<{}>) {
 
 
 function _defaultDbStatementSerializer(commandObj: string | Record<string, unknown>) {
-  const enhancedDbReporting = true;//!!this._config?.enhancedDatabaseReporting;
+  const { enhancedDbReporting } = settings;
   const resultObj = typeof commandObj == 'string'
     ? { _id: commandObj }
     : enhancedDbReporting
