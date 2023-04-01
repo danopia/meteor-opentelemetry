@@ -272,19 +272,26 @@ function cursorIds(cursor: Mongo.Cursor<{}>) {
 // }
 
 
-function _defaultDbStatementSerializer(commandObj: string | Record<string, unknown>) {
+function _defaultDbStatementSerializer(commandObj: string | Record<string, unknown>, isRoot=true) {
   const { enhancedDbReporting } = settings;
-  const resultObj = typeof commandObj == 'string'
-    ? { _id: commandObj }
-    : enhancedDbReporting
-      ? commandObj
-      : Object.entries(commandObj).reduce((obj, [key,val]) => {
-          obj[key] = key.startsWith('$')
-            ? (Array.isArray(val)
-              ? val.map(_defaultDbStatementSerializer)
-              : _defaultDbStatementSerializer(val))
-            : '?'; // TODO: if val is object and all keys start with '$' then convert that too
-          return obj;
-        }, {} as { [key: string]: unknown });
-  return resultObj;
+  if (typeof commandObj == 'string' && isRoot) return { _id: '?' };
+  if (enhancedDbReporting) return commandObj; // pretty leaky tbh
+
+  if (typeof commandObj == 'object' && commandObj.constructor == Object) {
+    // rewrite the object
+    return Object.fromEntries(Object.entries(commandObj).map(([key,val]) => {
+      if (key.startsWith('$')) {
+        if (Array.isArray(val)) {
+          return [key, val.map(x => _defaultDbStatementSerializer(x, false))];
+        }
+        return [key, _defaultDbStatementSerializer(val, false)];
+      }
+      // if val is object and all keys start with '$' then convert that too
+      if (val && typeof val == 'object' && Object.keys(val).every(x => x.startsWith('$'))) {
+        return [key, _defaultDbStatementSerializer(val, false)];
+      }
+      return [key, '?'];
+    }));
+  }
+  return '?';
 }
