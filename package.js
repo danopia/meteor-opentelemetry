@@ -24,6 +24,7 @@ Package.onUse(function(api) {
   api.versionsFrom('2.10.0');
   api.use('ecmascript');
   api.use('typescript');
+  api.use('zodern:types');
   api.use('montiapm:meteorx@2.2.0');
   api.mainModule('opentelemetry-client.js', 'client', {lazy: true});
   api.mainModule('opentelemetry-server.js', 'server');
