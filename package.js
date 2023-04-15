@@ -1,6 +1,6 @@
 Package.describe({
   name: 'danopia:opentelemetry',
-  version: '0.3.11',
+  version: '0.4.0',
   summary: 'Meteor instrumentations for OpenTelemetry tracing',
   git: 'https://github.com/danopia/meteor-opentelemetry',
   documentation: 'README.md',
@@ -24,7 +24,7 @@ Package.onUse(function(api) {
   api.versionsFrom('2.10.0');
   api.use('ecmascript');
   api.use('typescript');
-  api.use('zodern:types');
+  api.use('zodern:types@1.0.9');
   api.use('montiapm:meteorx@2.2.0');
   api.mainModule('opentelemetry-client.js', 'client', {lazy: true});
   api.mainModule('opentelemetry-server.js', 'server');
