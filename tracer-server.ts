@@ -2,7 +2,6 @@ import { diag, DiagConsoleLogger, DiagLogLevel, metrics } from "@opentelemetry/a
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 import { Resource } from '@opentelemetry/resources';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { BatchSpanProcessor, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
 
