@@ -81,6 +81,7 @@ import { Meteor } from "meteor/meteor";
         if (subSpan) {
           // console.log('sssub', subId, !!subSpan);
           subSpan.end();
+          this.subSpans?.delete(subId);
         }
       }
     } else if (payload.msg == 'nosub') {
@@ -90,6 +91,7 @@ import { Meteor } from "meteor/meteor";
         // console.log('nosssub', subId, !!subSpan, payload.error);
         recordSpanError(subSpan, payload.error);
         subSpan.end();
+        this.subSpans?.delete(subId);
       }
     }
     return origSend.call(this, payload, ...x);
