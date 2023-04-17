@@ -26,6 +26,10 @@ console.log('welcome', ddp.status())
 // }
 const origApply = ddp._apply
 ddp._apply = function _apply(this: typeof ddp, name, stubCallValue, args, options, callback) {
+  // TODO: why doesn't suppressTracing accomplish this?
+  if (name.startsWith('OTLP/')) {
+    return origApply.call(this, name, stubCallValue, args, options, callback);
+  }
   return methodTracer.startActiveSpan(name, {
     kind: SpanKind.CLIENT,
     attributes: {

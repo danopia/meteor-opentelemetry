@@ -5,6 +5,7 @@
 export const name = 'opentelemetry';
 
 import './ddp-otlp-server'
+import './clock-sync-server'
 import './tracer-server'
 
 export {
