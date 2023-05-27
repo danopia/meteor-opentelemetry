@@ -197,8 +197,8 @@ function collIds(coll: Mongo.Collection<{}>, filter: {}) {
     };
   }
   return {
-    databaseName: coll.rawDatabase().databaseName as string,
-    collectionName: coll.rawCollection().collectionName as string,
+    databaseName: coll._driver.mongo?.db.databaseName as string,
+    collectionName: coll._name as string,
     query: _defaultDbStatementSerializer(filter) ?? {},
   };
 }
