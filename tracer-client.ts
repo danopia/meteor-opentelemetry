@@ -8,7 +8,7 @@ import { Resource } from '@opentelemetry/resources';
 import { DDPSpanExporter } from "./ddp-otlp-client";
 import './instrument/ddp-client'
 
-const resource = new Resource({
+export const resource = new Resource({
   'session.host': document.location.host,
   'session.id': crypto.randomUUID(),
   'browser.languages': [...navigator.languages],
@@ -21,10 +21,10 @@ const resource = new Resource({
   'user_agent.original': navigator.userAgent,
 });
 
-const provider = new WebTracerProvider({
+export const tracer = new WebTracerProvider({
   resource,
 });
-provider.addSpanProcessor(new BatchSpanProcessor(new DDPSpanExporter()));
-provider.register({
+tracer.addSpanProcessor(new BatchSpanProcessor(new DDPSpanExporter()));
+tracer.register({
   // contextManager: new MeteorContextManager(),
 });
