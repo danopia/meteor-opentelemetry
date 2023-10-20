@@ -1,4 +1,19 @@
-# WIP
+# `danopia:opentelemetry`
+
+This Meteor package up OpenTelemetry (and OTLP-JSON) within a Meteor app.
+The tracer is customized for Meteor 2's quirky and incompatible way of executing async code.
+It should help with reporting traces to modern APM products from your existing Meteor app.
+
+## What about Meteor 3?
+
+Meteor 3 is already available as a pre-release and should resolve Meteor's incompatibilities with existing APM libraries.
+So the need for this library is partially replaced by the Meteor 3 update.
+
+However, this library also provides several OpenTelemetry integrations and APIs which are still useful in Meteor 3.
+
+> **Warning**
+> I'm not sure yet how I'll handle compatibility with Meteor 3.  
+> Rest assured I am looking to migrate my own apps, but am not yet sure how this package will migrate.
 
 ## NodeJS Instrumentation setup
 
@@ -10,6 +25,8 @@ For the full instrumentation suite, install
 [the meta package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node):
 
 `meteor npm i --save @opentelemetry/auto-instrumentations-node @opentelemetry/instrumentation`
+
+(Note that some auto-instrumentations don't hook up right, and might lack span parents, or might not register at all)
 
 Now you just need to configure the instrumentations.
 For example, this server file disables `fs` and also skips HTTP healthchecks:
