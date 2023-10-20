@@ -1,6 +1,6 @@
 # `danopia:opentelemetry`
 
-This Meteor package up OpenTelemetry (and OTLP-JSON) within a Meteor app.
+This Meteor package hooks up OpenTelemetry (and OTLP-JSON) within a Meteor app.
 The tracer is customized for Meteor 2's quirky and incompatible way of executing async code.
 It should help with reporting traces to modern APM products from your existing Meteor app.
 
