@@ -25,6 +25,9 @@ export class DDPSpanExporter implements SpanExporter {
           for (const span of scopeSpans.spans ?? []) {
             span.startTimeUnixNano += (clockOffset * 1_000_000);
             span.endTimeUnixNano += (clockOffset * 1_000_000);
+            for (const event of span.events ?? []) {
+              event.timeUnixNano += (clockOffset * 1_000_000);
+            }
           }
         }
       }
