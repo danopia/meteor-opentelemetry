@@ -30,7 +30,7 @@ export class DDPSpanExporter implements SpanExporter {
             span.startTimeUnixNano = `${Math.round(+span.startTimeUnixNano.slice(0, -6) + clockOffset)}000000`;
             span.endTimeUnixNano = `${Math.round(+span.endTimeUnixNano.slice(0, -6) + clockOffset)}000000`;
             for (const event of span.events ?? []) {
-              event.timeUnixNano = `${Math.round(+span.timeUnixNano.slice(0, -6) + clockOffset)}000000`;
+              event.timeUnixNano = `${Math.round(+event.timeUnixNano.slice(0, -6) + clockOffset)}000000`;
             }
           }
         }
