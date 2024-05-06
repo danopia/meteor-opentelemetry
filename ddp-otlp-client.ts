@@ -18,15 +18,19 @@ export class DDPSpanExporter implements SpanExporter {
           })
         : 0;
 
-      const req = createExportTraceServiceRequest(spans, true);
+      const req = createExportTraceServiceRequest(spans, {
+        useHex: true,
+        useLongBits: false,
+      });
 
       for (const resSpans of req.resourceSpans ?? []) {
         for (const scopeSpans of resSpans.scopeSpans) {
           for (const span of scopeSpans.spans ?? []) {
-            span.startTimeUnixNano += (clockOffset * 1_000_000);
-            span.endTimeUnixNano += (clockOffset * 1_000_000);
+            // We don't want to deal with LongBit high/low, instead we take strings and manipulate them that way
+            span.startTimeUnixNano = `${Math.round(+span.startTimeUnixNano.slice(0, -6) + clockOffset)}000000`;
+            span.endTimeUnixNano = `${Math.round(+span.endTimeUnixNano.slice(0, -6) + clockOffset)}000000`;
             for (const event of span.events ?? []) {
-              event.timeUnixNano += (clockOffset * 1_000_000);
+              event.timeUnixNano = `${Math.round(+span.timeUnixNano.slice(0, -6) + clockOffset)}000000`;
             }
           }
         }

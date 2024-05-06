@@ -1,6 +1,6 @@
 Package.describe({
   name: 'danopia:opentelemetry',
-  version: '0.5.0',
+  version: '0.6.0',
   summary: 'Meteor instrumentations for OpenTelemetry tracing',
   git: 'https://github.com/danopia/meteor-opentelemetry',
   documentation: 'README.md',
@@ -10,15 +10,15 @@ Npm.depends({
 
   // This needs to be a sort of peer dependency
   // TODO: consider https://github.com/Meteor-Community-Packages/check-npm-versions
-  // '@opentelemetry/api': '1.7.0',
+  // '@opentelemetry/api': '1.8.0',
 
-  '@opentelemetry/sdk-trace-node': '1.18.0',
-  '@opentelemetry/sdk-trace-web': '1.18.0',
-  '@opentelemetry/semantic-conventions': '1.18.0',
+  '@opentelemetry/sdk-trace-node': '1.24.0',
+  '@opentelemetry/sdk-trace-web': '1.24.0',
+  '@opentelemetry/semantic-conventions': '1.24.0',
 
-  '@opentelemetry/otlp-transformer': '0.45.0',
-  '@opentelemetry/exporter-trace-otlp-http': '0.45.0',
-  '@opentelemetry/exporter-metrics-otlp-http': '0.45.0',
+  '@opentelemetry/otlp-transformer': '0.51.0',
+  '@opentelemetry/exporter-trace-otlp-http': '0.51.0',
+  '@opentelemetry/exporter-metrics-otlp-http': '0.51.0',
 
 });
 
