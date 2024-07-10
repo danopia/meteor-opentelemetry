@@ -45,7 +45,7 @@ if (settings.enabled) {
       check(payload, {
         resourceSpans: Array,
       });
-      payload.resourceSpans?.forEach(mangleResource);
+      payload.resourceSpans?.forEach(mangleResource.bind(this));
       await new Promise<void>((ok, fail) =>
         sendWithHttp(tracesExporter, JSON.stringify(payload), 'application/json', ok, fail));
     },
@@ -54,7 +54,7 @@ if (settings.enabled) {
       check(payload, {
         resourceMetrics: Array,
       });
-      payload.resourceMetrics?.forEach(mangleResource);
+      payload.resourceMetrics?.forEach(mangleResource.bind(this));
       await new Promise<void>((ok, fail) =>
         sendWithHttp(metricsExporter._otlpExporter, JSON.stringify(payload), 'application/json', ok, fail));
     },

@@ -8,12 +8,9 @@ import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 
-import { MeteorContextManager } from "./server/context-manager";
 import { settings } from "./settings";
 
-import { wrapFibers } from './instrument/fibers'
 import './instrument/ddp-server'
-import './instrument/webapp'
 import './instrument/mongodb'
 
 if (settings.enabled) {
@@ -38,8 +35,5 @@ if (settings.enabled) {
   })));
   // this also sets the global trace provider:
   provider.register({
-    contextManager: new MeteorContextManager().enable(),
   });
-
-  wrapFibers(); // apparently needs to happen after the metrics provider is set up
 }
