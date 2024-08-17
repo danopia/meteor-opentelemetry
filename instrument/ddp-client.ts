@@ -41,8 +41,8 @@ ddp._apply = function _apply(this: typeof ddp, name, stubCallValue, args, option
   // 'ddp.user_id': this.userId ?? '',
       // 'ddp.connection': this.connection?.id,
     },
-  }, span => {
-    origApply.call(this, name, stubCallValue, args, options, callback);
+  }, () => {
+    return origApply.call(this, name, stubCallValue, args, options, callback);
     // span.end();
   });
 };
@@ -103,9 +103,9 @@ ddp._methodInvokers = new Proxy<Record<string|symbol,{
     });
     value._message.baggage = baggage;
     const origCb = value._onResultReceived;
-    value._onResultReceived = () => {
+    value._onResultReceived = (err: unknown, result: unknown) => {
       span?.end();
-      origCb();
+      origCb(err, result);
     }
     // console.log('set method invoker', {self, key, value})
     self[key] = value;
