@@ -12,7 +12,7 @@ export async function discoverClockOffset() {
 
   // Let's not make a big mess if the offset is (falsely) large
   if (Math.abs(offset) > 5000) {
-    console.log('CLock offset unbelievable:', offset);
+    console.log('Ignoring unreasonable clock offset of', offset, 'ms');
     return 0;
   }
 

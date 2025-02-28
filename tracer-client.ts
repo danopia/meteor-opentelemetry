@@ -15,7 +15,7 @@ export const resource = new Resource({
   'service.version': Meteor.gitCommitHash,
   // vvv https://opentelemetry.io/docs/reference/specification/resource/semantic_conventions/browser/
   'browser.brands': navigator.userAgentData?.brands?.map(x => `${x.brand} ${x.version}`) ?? [],
-  'browser.platform':navigator.userAgentData?.platform,
+  'browser.platform': navigator.userAgentData?.platform,
   'browser.mobile': navigator.userAgentData?.mobile,
   'browser.language': navigator.language,
   'user_agent.original': navigator.userAgent,
@@ -23,8 +23,8 @@ export const resource = new Resource({
 
 export const tracer = new WebTracerProvider({
   resource,
+  spanProcessors: [
+    new BatchSpanProcessor(new DDPSpanExporter()),
+  ],
 });
-tracer.addSpanProcessor(new BatchSpanProcessor(new DDPSpanExporter()));
-tracer.register({
-  // contextManager: new MeteorContextManager(),
-});
+tracer.register();
