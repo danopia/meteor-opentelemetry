@@ -56,8 +56,9 @@ if (settings.enabled) {
   Meteor.methods({
 
     async 'OTLP/v1/traces'(raw: unknown) {
-      check(raw, Uint8Array);
-      const payload = JSON.parse(new TextDecoder().decode(raw));
+      const payload = raw instanceof Uint8Array
+        ? JSON.parse(new TextDecoder().decode(raw))
+        : raw;
       check(payload, {
         resourceSpans: Array,
       });
@@ -67,8 +68,9 @@ if (settings.enabled) {
     },
 
     async 'OTLP/v1/metrics'(raw: unknown) {
-      check(raw, Uint8Array);
-      const payload = JSON.parse(new TextDecoder().decode(raw));
+      const payload = raw instanceof Uint8Array
+        ? JSON.parse(new TextDecoder().decode(raw))
+        : raw;
       check(payload, {
         resourceMetrics: Array,
       });
@@ -78,8 +80,9 @@ if (settings.enabled) {
     },
 
     async 'OTLP/v1/logs'(raw: unknown) {
-      check(raw, Uint8Array);
-      const payload = JSON.parse(new TextDecoder().decode(raw));
+      const payload = raw instanceof Uint8Array
+        ? JSON.parse(new TextDecoder().decode(raw))
+        : raw;
       check(payload, {
         resourceLogs: Array,
       });
