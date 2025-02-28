@@ -1,6 +1,6 @@
 Package.describe({
   name: 'danopia:opentelemetry',
-  version: '0.8.0-beta.3',
+  version: '0.8.0-beta.4',
   summary: 'Meteor v3 instrumentations for OpenTelemetry tracing',
   git: 'https://github.com/danopia/meteor-opentelemetry',
   documentation: 'README.md',
@@ -20,6 +20,9 @@ Npm.depends({
   '@opentelemetry/exporter-trace-otlp-http': '0.57.2',
   '@opentelemetry/exporter-metrics-otlp-http': '0.57.2',
   '@opentelemetry/exporter-logs-otlp-http': '0.57.2',
+
+  // TODO: consider replacing our mongodb instrumentation with:
+  // '@opentelemetry/instrumentation-mongodb': '',
 
 });
 
