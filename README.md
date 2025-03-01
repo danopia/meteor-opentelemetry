@@ -4,31 +4,38 @@ This Meteor package hooks up OpenTelemetry (and OTLP-JSON) within a Meteor app.
 It should help with reporting distributed traces to modern APM products from your existing Meteor app.
 DDP methods and subscriptions will be instrumented between the client and the server programs.
 
-## Meteor Major Versions
+For a basic introduction to this package and some historical background on Meteor 2, see my blog post:
 
-**The last release of this package to target Meteor 2.x is `0.6.2`.**
-
-Currently, version `0.7.0-beta2` is targetting Meteor 3.0.
-It will be promoted to a stable release after enough real-world testing.
+* [Tracing Meteor applications with OpenTelemetry](https://danopia.net/posts/2023/meteor-opentelemetry-intro.html)
 
 ### For Meteor 2.x Apps
-Meteor 2 used Fibers instead of async/await, and
-this has meant that Meteor 2 could not leverage the usual NodeJS tracing implementations.
+**The last release of this package to target Meteor 2.x is `0.6.2`.**
 
-The tracer in this library is customized for
-Meteor 2's quirky and incompatible way of executing async code.
+I recommend migrating your apps to Meteor 3.
 
-Regardless, I recommend trying a Meteor 3 migration
-to modernize your app server and align it with the wider NodeJS ecosystem.
+For information about using this library with Meteor 2.x,
+check out [the archived README](https://github.com/danopia/meteor-opentelemetry/blob/v0.6.2/README.md).
 
 ### For Meteor 3.x Apps
-Meteor 3.0 is officially out and should resolve Meteor's incompatibilities with existing APM libraries.
+Since mid-2024,
+Meteor 3.0 is officially out and resolves Meteor's technical incompatibilities with existing APM libraries.
 So the need for this library is partially replaced by the Meteor 3 update.
 
 However, this library also provides several OpenTelemetry integrations and APIs
 which are still useful in Meteor 3.
+This includes client-to-server trace propagation thru DDP methods and subscriptions,
+Meteor Mongo instrumentation on the server,
+and telemetry submission over the existing DDP connection.
+
+Maintanence and updates shall continue (at a casual cadence).
 
 ## NodeJS Instrumentation setup
+
+The server tracer is easily set up from importing it at the top of your server entrypoint:
+
+```ts
+import 'meteor/danopia:opentelemetry';
+```
 
 If you'd like to benefit from the standard NodeJS instrumentations
 such as HTTP and gRPC, install and register them directly.
@@ -39,12 +46,12 @@ For the full instrumentation suite, install
 
 `meteor npm i --save @opentelemetry/auto-instrumentations-node @opentelemetry/instrumentation`
 
-(Note that on Meteor 2.x, some auto-instrumentations don't hook up right, and might lack span parents, or might not register at all)
-
 Now you just need to configure the instrumentations.
 For example, this server file disables `fs` and also skips HTTP healthchecks:
 
 ```ts
+import 'meteor/danopia:opentelemetry';
+
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 
