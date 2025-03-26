@@ -3,12 +3,12 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 import { Meteor } from "meteor/meteor";
 import { BatchSpanProcessor, WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 
 import { DDPSpanExporter } from "./ddp-otlp-client";
 import './instrument/ddp-client'
 
-export const resource = new Resource({
+export const resource = resourceFromAttributes({
   'session.host': document.location.host,
   'session.id': crypto.randomUUID(),
   'browser.languages': [...navigator.languages],

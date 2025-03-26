@@ -1,7 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { check } from "meteor/check";
 
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 
 import { settings } from "./settings";
 import { getHttpConfiguration } from "./otel-platform/exporter-config";
@@ -12,7 +12,7 @@ if (settings.enabled) {
   const metricsConfig = getHttpConfiguration('METRICS', 'v1/metrics', settings.otlpEndpoint);
   const logsConfig = getHttpConfiguration('LOGS', 'v1/logs', settings.otlpEndpoint);
 
-  const clientResources = new Resource(settings.clientResourceAttributes ?? {});
+  const clientResources = resourceFromAttributes(settings.clientResourceAttributes ?? {});
   clientResources.attributes['service.name'] ??= `unknown_service-browser`;
   const clientAttributeList = Object.entries(clientResources.attributes).map(x => ({
     key: x[0],

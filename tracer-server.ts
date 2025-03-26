@@ -2,7 +2,7 @@ import { diag, DiagConsoleLogger, DiagLogLevel, metrics } from "@opentelemetry/a
 import { logs } from "@opentelemetry/api-logs";
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { BatchSpanProcessor, NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
 import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
@@ -17,7 +17,7 @@ import './instrument/ddp-server'
 import './instrument/mongodb'
 
 if (settings.enabled) {
-  const resource = new Resource(settings.serverResourceAttributes ?? {});
+  const resource = resourceFromAttributes(settings.serverResourceAttributes ?? {});
 
   const metricsProvider = new MeterProvider({
     resource,
